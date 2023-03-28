@@ -1,0 +1,49 @@
+name: "install-fappcli-action"
+description: "Install the fappcli tool for Axis ACAP development"
+
+inputs:
+  token:
+    description: "The FixedIT access token"
+    required: true
+  fappcli-version:
+    description: "The version of fappcli to use"
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - name: Unpack token
+      id: unpack-token
+      shell: bash
+      run: |
+        JSON_TOKEN=$(echo ${{ inputs.token }} | base64 -d)
+        TOKEN_FILE=$(mktemp)
+        echo $JSON_TOKEN > $TOKEN_FILE
+        echo "token-file=$TOKEN_FILE" >> $GITHUB_OUTPUT
+    - name: Load token data
+      id: token
+      uses: zoexx/github-action-json-file-properties@1.0.4
+      with:
+        file_path: ${{ steps.unpack-token.outputs.token-file }}
+    - name: Remove the token file
+      shell: bash
+      run: |
+        rm ${{ steps.unpack-token.outputs.token-file }}
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    - uses: aws-actions/setup-sam@v2
+    - name: Install fappcli
+      shell: bash
+      env:
+        AWS_ACCESS_KEY_ID: ${{ steps.token.outputs.key_id }}
+        AWS_SECRET_ACCESS_KEY: ${{ steps.token.outputs.key }}
+        AWS_REGION: ${{ steps.token.outputs.region }}
+      run: |
+        python -m pip install --upgrade pip
+        ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
+        CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token --domain ${{ steps.token.outputs.py_registry }} --domain-owner $ACCOUNT_ID --region ${{ steps.token.outputs.region }} --query authorizationToken --output text)
+        INDEX_URL="https://aws:$CODEARTIFACT_AUTH_TOKEN@${{ steps.token.outputs.py_registry }}-$ACCOUNT_ID.d.codeartifact.${{ steps.token.outputs.region }}.amazonaws.com/pypi/${{ steps.token.outputs.py_registry }}/simple/"
+        FAPPCLI_VERSION=`[[ -n "${{ inputs.fappcli-version }}" ]] && echo ${{ inputs.fappcli-version }} || echo 0.1.dev1+g4469bdd`
+        pip install fappcli==$FAPPCLI_VERSION --extra-index-url=$INDEX_URL
+        echo "{\"secrets\": {\"default\": \"${{ inputs.token }}\"}}" > ~/.fapp
