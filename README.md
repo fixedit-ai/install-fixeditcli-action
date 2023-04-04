@@ -3,6 +3,6 @@ An action for Github Action that installs the FApp CLI tool to make Axis ACAP de
 
 This tool can be used to build ACAP applications, inspect/verify `.eap` package files and create new applications from templates.
 
-See also:
+For use in GitHub Actions, see also:
 * [build-eap-action](https://github.com/fixedit-ai/build-eap-action)
 * [test-eap-action](https://github.com/fixedit-ai/test-eap-action)
