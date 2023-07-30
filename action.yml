@@ -44,6 +44,6 @@ runs:
         ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
         CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token --domain ${{ steps.token.outputs.py_domain }} --domain-owner $ACCOUNT_ID --region ${{ steps.token.outputs.region }} --query authorizationToken --output text)
         INDEX_URL="https://aws:$CODEARTIFACT_AUTH_TOKEN@${{ steps.token.outputs.py_domain }}-$ACCOUNT_ID.d.codeartifact.${{ steps.token.outputs.region }}.amazonaws.com/pypi/${{ steps.token.outputs.py_repository }}/simple/"
-        FAPPCLI_VERSION=`[[ -n "${{ inputs.fappcli-version }}" ]] && echo ${{ inputs.fappcli-version }} || echo 0.1.dev1+g21fa8f7`
+        FAPPCLI_VERSION=`[[ -n "${{ inputs.fappcli-version }}" ]] && echo ${{ inputs.fappcli-version }} || echo 0.1.dev1+g8ede180`
         pip install fappcli==$FAPPCLI_VERSION --extra-index-url=$INDEX_URL
         echo "{\"secrets\": {\"default\": \"${{ inputs.token }}\"}}" > ~/.fapp
