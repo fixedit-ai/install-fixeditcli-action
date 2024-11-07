@@ -1,12 +1,12 @@
-name: "install-fappcli-action"
-description: "Install the fappcli tool for Axis ACAP development"
+name: "install-fixeditcli-action"
+description: "Install the FixedIT CLI tool for Axis ACAP development"
 
 inputs:
   token:
     description: "The FixedIT access token"
     required: true
-  fappcli-version:
-    description: "The version of fappcli to use (otherwise latest)"
+  fixeditcli-version:
+    description: "The version of fixeditcli to use (otherwise latest)"
     default: ""
 
 runs:
@@ -33,7 +33,7 @@ runs:
       with:
         python-version: '3.11'
     - uses: aws-actions/setup-sam@v2
-    - name: Install fappcli
+    - name: Install fixeditcli
       shell: bash
       env:
         AWS_ACCESS_KEY_ID: ${{ steps.token.outputs.key_id }}
@@ -44,6 +44,6 @@ runs:
         ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
         CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token --domain ${{ steps.token.outputs.py_domain }} --domain-owner $ACCOUNT_ID --region ${{ steps.token.outputs.region }} --query authorizationToken --output text)
         INDEX_URL="https://aws:$CODEARTIFACT_AUTH_TOKEN@${{ steps.token.outputs.py_domain }}-$ACCOUNT_ID.d.codeartifact.${{ steps.token.outputs.region }}.amazonaws.com/pypi/${{ steps.token.outputs.py_repository }}/simple/"
-        FAPPCLI_PACKAGE=`[[ -n "${{ inputs.fappcli-version }}" ]] && echo fappcli==${{ inputs.fappcli-version }} || echo fappcli`
-        pip install $FAPPCLI_PACKAGE --extra-index-url=$INDEX_URL
-        echo "{\"secrets\": {\"default\": \"${{ inputs.token }}\"}}" > ~/.fapp
+        FIXEDITCLI_PACKAGE=`[[ -n "${{ inputs.fixeditcli-version }}" ]] && echo fixeditcli==${{ inputs.fixeditcli-version }} || echo fixeditcli`
+        pip install $FIXEDITCLI_PACKAGE --extra-index-url=$INDEX_URL
+        echo "{\"secrets\": {\"default\": \"${{ inputs.token }}\"}}" > ~/.fixedit
